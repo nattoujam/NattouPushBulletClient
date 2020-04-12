@@ -14,7 +14,7 @@ namespace NattouPushBulletClient
 	/// </summary>
 	public partial class App : Application
     {
-		private readonly string APP_ID = "NattouBulletClient-Key";
+		private readonly string APP_ID = "NattouPushBulletClient-Key";
 		private readonly NotifyIcon notifyIcon;
 		private readonly ToastNotificationSender sender;
 		private readonly PushBulletMessageReceiver receiver;
