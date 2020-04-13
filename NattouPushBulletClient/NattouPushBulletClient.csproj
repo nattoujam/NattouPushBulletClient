@@ -127,5 +127,11 @@
   <ItemGroup>
     <Resource Include="Resources\TestIcon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icon_stop.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icon_run.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

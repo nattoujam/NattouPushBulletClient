@@ -23,6 +23,7 @@ namespace NattouPushBulletClient.Components
             {
                 this.isRunning = value;
                 var appName = Assembly.GetExecutingAssembly().GetName().Name;
+                this.notifyIcon1.Icon = value ? Properties.Resources.Icon_run : Properties.Resources.Icon_stop;
                 this.notifyIcon1.Text = appName + " - " + (value ? "Running" : "Stop");
                 this.RunStopMenuItem.Text = value ? "Stop" : "Run";
             }
@@ -36,7 +37,7 @@ namespace NattouPushBulletClient.Components
         {
             InitializeComponent();
             this.IsRunning = false;
-            this.notifyIcon1.Icon = Properties.Resources.TestIcon;
+            this.notifyIcon1.Icon = Properties.Resources.Icon_stop;
             RunStopMenuItem.Click += delegate (object sender, EventArgs e)
             {
                 if (this.isRunning)
