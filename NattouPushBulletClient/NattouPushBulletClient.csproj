@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -64,13 +67,14 @@
       <DependentUpon>NotifyIcon.cs</DependentUpon>
     </Compile>
     <Compile Include="PushBulletEphemerals\DismissalEphemeral.cs" />
+    <Compile Include="PushBulletEphemerals\SmsEpemeral.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ToastNotificationSender.cs" />
     <Compile Include="PushBulletMessageReceiver.cs" />
     <Compile Include="PushBulletEphemerals\MirrorEphemeral.cs" />
-    <Compile Include="PushBulletEphemerals\Ephemeral.cs" />
+    <Compile Include="PushBulletEphemerals\Message.cs" />
     <Compile Include="ShellHelper.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -132,6 +136,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Icon_run.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

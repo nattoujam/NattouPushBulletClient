@@ -4,19 +4,23 @@ using Newtonsoft.Json.Linq;
 namespace NattouPushBulletClient.PushBulletEphemerals
 {
     [JsonObject]
-    class Ephemeral
+    class Message
     {
         [JsonProperty("type")]
         public string Type { set; get; }
 
         [JsonProperty("push")]
-        public JObject Message { get; set; }
+        public JObject Push { get; set; }
+
+        [JsonProperty("subtype")]
+        public string SubType { get; set; }
 
         public override string ToString()
         {
             return
                 $"Type = {Type}\n" +
-                $"Push = {Message}"
+                $"SubType = {SubType}\n" +
+                $"Push = {Push}"
                 ;
         }
     }

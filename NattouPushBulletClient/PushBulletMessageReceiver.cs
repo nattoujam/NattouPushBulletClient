@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NattouPushBulletClient.PushBulletEphemerals;
+using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
@@ -10,8 +12,10 @@ namespace NattouPushBulletClient
 {
     class PushBulletMessageReceiver
     {
-        public Action<string> ReceiveCallBack { set; private get; }
         public event EventHandler FailedToConnectEventHander;
+        public event EventHandler<MirrorEphemeral> ReceiveMirrorEpemeral;
+        public event EventHandler<DismissalEphemeral> ReceiveDismissalEphemeral;
+        public event EventHandler<SmsEpemeral> ReceiveSmsEpemeral;
 
         private ClientWebSocket ws;
         private CancellationTokenSource connectTokenSource;
@@ -58,9 +62,62 @@ namespace NattouPushBulletClient
                 {
                     while (!this.receiveTokenSource.IsCancellationRequested)
                     {
-                        var mes = await ReceiveAsync(this.receiveTokenSource.Token);
-                        if(mes.Length != 0)
-                            this.ReceiveCallBack.Invoke(mes);
+                        var jsonStr = await ReceiveAsync(this.receiveTokenSource.Token);
+                        if (jsonStr.Length == 0)
+                            continue;
+
+                        try
+                        {
+                            var mes = JsonConvert.DeserializeObject<Message>(jsonStr);
+                            Debug.WriteLine("----- Mes -----");
+                            Debug.WriteLine(mes.ToString());
+                            Debug.WriteLine("----------------");
+
+                            switch (mes.Type)
+                            {
+                                case "nop":
+                                    break;
+                                case "tickle":
+                                    break;
+                                case "push":
+                                    var tmp = JsonConvert.DeserializeObject<Message>(mes.Push.ToString());
+                                    switch (tmp.Type)
+                                    {
+                                        case "messaging_extension_reply":
+                                            var smsMes = JsonConvert.DeserializeObject<SmsEpemeral>(mes.Push.ToString());
+                                            Debug.WriteLine("------- SMS -------");
+                                            Debug.WriteLine(smsMes.ToString());
+                                            this.ReceiveSmsEpemeral.Invoke(this, smsMes);
+                                            break;
+                                        case "mirror":
+                                            var mirrorMes = JsonConvert.DeserializeObject<MirrorEphemeral>(mes.Push.ToString());
+                                            Debug.WriteLine("----- Mirror ------");
+                                            Debug.WriteLine(mirrorMes.ToString());
+                                            this.ReceiveMirrorEpemeral.Invoke(this, mirrorMes);
+                                            break;
+                                        case "dismissal":
+                                            var dismissalMes = JsonConvert.DeserializeObject<DismissalEphemeral>(mes.Push.ToString());
+                                            Debug.WriteLine("----- Dismiss -----");
+                                            Debug.WriteLine(dismissalMes.ToString());
+                                            this.ReceiveDismissalEphemeral.Invoke(this, dismissalMes);
+                                            break;
+                                        case "clip":
+                                            break;
+                                        default:
+                                            Debug.WriteLine($"Undefined Ephemeral: {tmp.Type}");
+                                            break;
+                                    }
+                                    Debug.WriteLine("------------------");
+                                    break;
+                                default:
+                                    Debug.WriteLine($"Undefined Message: {mes.Type}");
+                                    break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
                     }
                 }
 
