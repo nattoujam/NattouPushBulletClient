@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -20,7 +21,7 @@ namespace NattouPushBulletClient
 		private readonly ToastNotificationSender sender;
 		private readonly PushBulletMessageReceiver receiver;
 		private string failedToConnectToastNotificationId = string.Empty;
-		
+
 		public App()
 		{
 			this.notifyIcon = new NotifyIcon();
@@ -31,10 +32,8 @@ namespace NattouPushBulletClient
 			this.sender = new ToastNotificationSender(this.APP_ID);
 			this.receiver = new PushBulletMessageReceiver();
 			this.receiver.FailedToConnectEventHander += Receiver_FailedToConnectEventHander;
-			this.receiver.ReceiveCallBack = s =>
-			{
-				this.sender.SendToastNotification(s);
-			};
+			this.receiver.ReceiveMirrorEpemeral += Receiver_ReceiveMirrorEpemeral;
+			this.receiver.ReceiveDismissalEphemeral += Receiver_ReceiveDismissalEphemeral;
 		}
 
 		protected override void OnStartup(StartupEventArgs e)
@@ -42,10 +41,9 @@ namespace NattouPushBulletClient
             base.OnStartup(e);
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-			Task.Run(() => TryCreateShortcut()).Wait();
-
-			Task.Run(() => StartMainTask());
-        }
+			CreateShortcut();
+			_ = StartMainTask();
+		}
 
 		private async Task StartMainTask()
 		{
@@ -71,16 +69,14 @@ namespace NattouPushBulletClient
 			return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Microsoft\\Windows\\Start Menu\\Programs\\" + shortcutName + ".lnk";
 		}
 
-		private bool TryCreateShortcut()
+		private void CreateShortcut()
 		{
 			var shortcutPath = GetShortcutPath();
 			Debug.WriteLine(shortcutPath);
 			if (!File.Exists(shortcutPath))
 			{
 				InstallShortcut(shortcutPath);
-				return true;
 			}
-			return false;
 		}
 
 		private void InstallShortcut(string shortcutPath)
@@ -110,7 +106,7 @@ namespace NattouPushBulletClient
 
 		private void NotifyIcon_RunMenuItemClick(object sender, EventArgs e)
 		{
-			Task.Run(() => StartMainTask());
+			_ = StartMainTask();
 		}
 		private void NotifyIcon_StopMenuItemClick(object sender, EventArgs e)
 		{
@@ -129,7 +125,7 @@ namespace NattouPushBulletClient
 				File.Delete(shortcutPath);
 
 				// ショートカットを生成
-				TryCreateShortcut();
+				CreateShortcut();
 
 				if (!this.notifyIcon.IsRunning)
 					NotifyIcon_RunMenuItemClick(this, EventArgs.Empty);
@@ -147,6 +143,16 @@ namespace NattouPushBulletClient
 			this.failedToConnectToastNotificationId = "Information-FailedToConnect-ID";
 			this.sender.RemoveToastNotification(this.failedToConnectToastNotificationId);
 			this.sender.SendInformationToastNotification(this.failedToConnectToastNotificationId, "サーバーに接続できません。AccessTokenの設定やネットワークの設定を確認してください。", DateTime.Now.AddDays(1));
+		}
+		private void Receiver_ReceiveMirrorEpemeral(object sender, PushBulletEphemerals.MirrorEphemeral e)
+		{
+			// トースト通知発行
+			this.sender.SendToastNotification(e);
+		}
+		private void Receiver_ReceiveDismissalEphemeral(object sender, PushBulletEphemerals.DismissalEphemeral e)
+		{
+			// 確認済みの通知をアクションセンターから削除
+			this.sender.RemoveToastNotification(e.Id);
 		}
 	}
 }

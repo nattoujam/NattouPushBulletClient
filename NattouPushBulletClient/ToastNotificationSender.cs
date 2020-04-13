@@ -1,12 +1,10 @@
 ﻿using Microsoft.Toolkit.Uwp.Notifications;
 using NattouPushBulletClient.PushBulletEphemerals;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using Windows.ApplicationModel.Activation;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -25,69 +23,31 @@ namespace NattouPushBulletClient
         }
 
 		/// <summary>
-		/// Send ToastNorification when needed.
+		/// Send mirroring notification as toast notification.
 		/// </summary>
-		/// <param name="str">raw string from PushBullet API</param>
-		/// <returns></returns>
-		public void SendToastNotification(string str)
+		/// <param name="me"></param>
+		public void SendToastNotification(MirrorEphemeral me)
 		{
-			try
-			{
-				var mes = JsonConvert.DeserializeObject<Ephemeral>(str);
-				Debug.WriteLine("----- Mes -----");
-				Debug.WriteLine(mes.ToString());
-				Debug.WriteLine("----------------");
+			// toast生成
+			var toast = CreateToastNotification(me.Title, me.Body, me.Icon, me.ApplicationName);
+			toast.Tag = me.Id;
+			toast.Group = me.ApplicationName;
+			this.groupNamePair.Add(toast.Tag, me.ApplicationName);
 
-				if (mes.Type.Equals("push"))
-				{
-					var tmp = JsonConvert.DeserializeObject<Ephemeral>(mes.Message.ToString());
-					switch (tmp.Type)
-					{
-						case "messaging_extension_reply":
-							break;
-						case "mirror":
-							var mirrorMes = JsonConvert.DeserializeObject<MirrorEphemeral>(mes.Message.ToString());
-							Debug.WriteLine("----- Mirror -----");
-							Debug.WriteLine(mirrorMes.ToString());
-							Debug.WriteLine("------------------");
-							
-							// toast生成
-							var toast = CreateToastNotification(mirrorMes.Title, mirrorMes.Body, mirrorMes.Icon, mirrorMes.ApplicationName);
-							toast.Tag = mirrorMes.Id;
-							toast.Group = mirrorMes.ApplicationName;
-							this.groupNamePair.Add(toast.Tag, mirrorMes.ApplicationName);
-							ToastNotificationManager.CreateToastNotifier(this.appId).Show(toast);
-							break;
-						case "dismissal":
-							var dismissalMes = JsonConvert.DeserializeObject<DismissalEphemeral>(mes.Message.ToString());
-							Debug.WriteLine("----- Dismiss -----");
-							Debug.WriteLine(dismissalMes.ToString());
-							Debug.WriteLine("-------------------");
-
-							// 確認済みの通知をアクションセンターから削除
-							RemoveToastNotification(dismissalMes.Id);
-							break;
-						case "clip":
-							break;
-						default:
-							Debug.WriteLine($"Undefined Message: {tmp.Type}");
-							break;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine(ex.Message);
-			}
+			// toast発行
+			ToastNotificationManager.CreateToastNotifier(this.appId).Show(toast);
 		}
 
 		public void SendInformationToastNotification(string id, string body, DateTimeOffset duration)
 		{
+			// toast生成
 			var toast = CreateToastNotification("業務連絡", body, Assembly.GetExecutingAssembly().GetName().Name);
 			toast.ExpirationTime = duration;
 			toast.Tag = id;
 			toast.Group = "Information";
 			this.groupNamePair.Add(id, toast.Group);
+
+			// toast発行
 			ToastNotificationManager.CreateToastNotifier(this.appId).Show(toast);
 		}
 
@@ -139,6 +99,11 @@ namespace NattouPushBulletClient
 							{
 								Text = body
 							}
+						},
+						AppLogoOverride = new ToastGenericAppLogo()
+						{
+							Source = Directory.GetParent(Assembly.GetExecutingAssembly().Location) + "Icon.ico",
+							HintCrop = ToastGenericAppLogoCrop.Circle //画像を丸くトリミング
 						},
 						Attribution = new ToastGenericAttributionText()
 						{
