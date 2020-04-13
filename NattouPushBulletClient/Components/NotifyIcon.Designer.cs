@@ -36,6 +36,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ExitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.ResetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuStrip1.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -43,10 +45,12 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.RunStopMenuItem,
             this.SettingMenuItem,
+            this.toolStripSeparator2,
+            this.ResetMenuItem,
             this.toolStripSeparator1,
             this.ExitMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(117, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(117, 104);
             // 
             // RunStopMenuItem
             // 
@@ -77,6 +81,17 @@
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "NattouBulletClient";
             this.notifyIcon1.Visible = true;
+            // 
+            // ResetMenuItem
+            // 
+            this.ResetMenuItem.Name = "ResetMenuItem";
+            this.ResetMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.ResetMenuItem.Text = "Reset";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(113, 6);
             this.contextMenuStrip1.ResumeLayout(false);
 
         }
@@ -89,5 +104,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem SettingMenuItem;
         private System.Windows.Forms.ToolStripMenuItem RunStopMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem ResetMenuItem;
     }
 }

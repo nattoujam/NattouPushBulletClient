@@ -4,6 +4,7 @@ using NattouPushBulletClient.Components;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -25,7 +26,8 @@ namespace NattouPushBulletClient
 			this.notifyIcon = new NotifyIcon();
 			this.notifyIcon.RunMenuItemClick += NotifyIcon_RunMenuItemClick;
 			this.notifyIcon.StopMenuItemClick += NotifyIcon_StopMenuItemClick;
-			this.notifyIcon.ExitMenuItemClick += NotifyIcon_CloesMenuItemClick;
+			this.notifyIcon.ResetMenuItemClick += NotifyIcon_ResetMenuItemClick;
+			this.notifyIcon.ExitMenuItemClick += NotifyIcon_ExitMenuItemClick;
 			this.sender = new ToastNotificationSender(this.APP_ID);
 			this.receiver = new PushBulletMessageReceiver();
 			this.receiver.FailedToConnectEventHander += Receiver_FailedToConnectEventHander;
@@ -39,13 +41,30 @@ namespace NattouPushBulletClient
 		{
 			Task.Run(() => StartMainTask());
 		}
-
 		private void NotifyIcon_StopMenuItemClick(object sender, EventArgs e)
 		{
 			this.receiver.Close();
 			this.notifyIcon.IsRunning = false;
 		}
-		private void NotifyIcon_CloesMenuItemClick(object sender, EventArgs e)
+		private void NotifyIcon_ResetMenuItemClick(object sender, EventArgs e)
+		{
+			var shortcutPath = GetShortcutPath();
+			if (File.Exists(shortcutPath))
+			{
+				if (this.notifyIcon.IsRunning)
+					NotifyIcon_StopMenuItemClick(this, EventArgs.Empty);
+
+				// ショートカットを削除
+				File.Delete(shortcutPath);
+
+				// ショートカットを生成
+				TryCreateShortcut();
+
+				if (!this.notifyIcon.IsRunning)
+					NotifyIcon_RunMenuItemClick(this, EventArgs.Empty);
+			}
+		}
+		private void NotifyIcon_ExitMenuItemClick(object sender, EventArgs e)
 		{
 			this.notifyIcon.Dispose();
 			this.receiver.Close();
@@ -87,10 +106,15 @@ namespace NattouPushBulletClient
 			}
 		}
 
+		private string GetShortcutPath()
+		{
+			var shortcutName = Assembly.GetExecutingAssembly().GetName().Name;
+			return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Microsoft\\Windows\\Start Menu\\Programs\\" + shortcutName + ".lnk";
+		}
+
 		private bool TryCreateShortcut()
 		{
-			var shortcutName = "NattouPushBulletClient";
-			var shortcutPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Microsoft\\Windows\\Start Menu\\Programs\\" + shortcutName + ".lnk";
+			var shortcutPath = GetShortcutPath();
 			Debug.WriteLine(shortcutPath);
 			if (!File.Exists(shortcutPath))
 			{
