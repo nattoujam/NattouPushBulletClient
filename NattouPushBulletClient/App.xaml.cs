@@ -37,47 +37,6 @@ namespace NattouPushBulletClient
 			};
 		}
 
-		private void NotifyIcon_RunMenuItemClick(object sender, EventArgs e)
-		{
-			Task.Run(() => StartMainTask());
-		}
-		private void NotifyIcon_StopMenuItemClick(object sender, EventArgs e)
-		{
-			this.receiver.Close();
-			this.notifyIcon.IsRunning = false;
-		}
-		private void NotifyIcon_ResetMenuItemClick(object sender, EventArgs e)
-		{
-			var shortcutPath = GetShortcutPath();
-			if (File.Exists(shortcutPath))
-			{
-				if (this.notifyIcon.IsRunning)
-					NotifyIcon_StopMenuItemClick(this, EventArgs.Empty);
-
-				// ショートカットを削除
-				File.Delete(shortcutPath);
-
-				// ショートカットを生成
-				TryCreateShortcut();
-
-				if (!this.notifyIcon.IsRunning)
-					NotifyIcon_RunMenuItemClick(this, EventArgs.Empty);
-			}
-		}
-		private void NotifyIcon_ExitMenuItemClick(object sender, EventArgs e)
-		{
-			this.notifyIcon.Dispose();
-			this.receiver.Close();
-			this.sender.SendInformationToastNotification("Information-ApplicationExit-ID", "アプリケーションを終了します。", DateTime.Now.AddSeconds(10));
-			Current.Shutdown();
-		}
-		private void Receiver_FailedToConnectEventHander(object sender, EventArgs e)
-		{
-			this.failedToConnectToastNotificationId = "Information-FailedToConnect-ID";
-			this.sender.RemoveToastNotification(this.failedToConnectToastNotificationId);
-			this.sender.SendInformationToastNotification(this.failedToConnectToastNotificationId, "サーバーに接続できません。AccessTokenの設定やネットワークの設定を確認してください。", DateTime.Now.AddDays(1));
-		}
-
 		protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -124,7 +83,6 @@ namespace NattouPushBulletClient
 			return false;
 		}
 
-
 		private void InstallShortcut(string shortcutPath)
 		{
 			// Find the path to the current executable
@@ -148,6 +106,47 @@ namespace NattouPushBulletClient
 			IPersistFile newShortcutSave = (IPersistFile)newShortcut;
 
 			ErrorHelper.VerifySucceeded(newShortcutSave.Save(shortcutPath, true));
+		}
+
+		private void NotifyIcon_RunMenuItemClick(object sender, EventArgs e)
+		{
+			Task.Run(() => StartMainTask());
+		}
+		private void NotifyIcon_StopMenuItemClick(object sender, EventArgs e)
+		{
+			this.receiver.Close();
+			this.notifyIcon.IsRunning = false;
+		}
+		private void NotifyIcon_ResetMenuItemClick(object sender, EventArgs e)
+		{
+			var shortcutPath = GetShortcutPath();
+			if (File.Exists(shortcutPath))
+			{
+				if (this.notifyIcon.IsRunning)
+					NotifyIcon_StopMenuItemClick(this, EventArgs.Empty);
+
+				// ショートカットを削除
+				File.Delete(shortcutPath);
+
+				// ショートカットを生成
+				TryCreateShortcut();
+
+				if (!this.notifyIcon.IsRunning)
+					NotifyIcon_RunMenuItemClick(this, EventArgs.Empty);
+			}
+		}
+		private void NotifyIcon_ExitMenuItemClick(object sender, EventArgs e)
+		{
+			this.notifyIcon.Dispose();
+			this.receiver.Close();
+			this.sender.SendInformationToastNotification("Information-ApplicationExit-ID", "アプリケーションを終了します。", DateTime.Now.AddSeconds(10));
+			Current.Shutdown();
+		}
+		private void Receiver_FailedToConnectEventHander(object sender, EventArgs e)
+		{
+			this.failedToConnectToastNotificationId = "Information-FailedToConnect-ID";
+			this.sender.RemoveToastNotification(this.failedToConnectToastNotificationId);
+			this.sender.SendInformationToastNotification(this.failedToConnectToastNotificationId, "サーバーに接続できません。AccessTokenの設定やネットワークの設定を確認してください。", DateTime.Now.AddDays(1));
 		}
 	}
 }
