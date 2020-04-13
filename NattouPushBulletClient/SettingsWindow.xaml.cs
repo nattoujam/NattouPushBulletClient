@@ -17,7 +17,6 @@ namespace NattouPushBulletClient
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            Console.WriteLine(e.Cancel);
             Properties.Settings.Default.AccessToken = this.AccessTokenTextBox.Text;
 			Properties.Settings.Default.Save();
         }

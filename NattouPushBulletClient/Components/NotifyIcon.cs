@@ -14,6 +14,7 @@ namespace NattouPushBulletClient.Components
     {
         public event EventHandler RunMenuItemClick;
         public event EventHandler StopMenuItemClick;
+        public event EventHandler ResetMenuItemClick;
         public event EventHandler ExitMenuItemClick;
 
         private bool isRunning;
@@ -49,6 +50,10 @@ namespace NattouPushBulletClient.Components
             {
                 var settingsWindow = new SettingsWindow();
                 settingsWindow.Show();
+            };
+            ResetMenuItem.Click += delegate (object sender, EventArgs e)
+            {
+                this.ResetMenuItemClick.Invoke(sender, e);
             };
             ExitMenuItem.Click += delegate (object sender, EventArgs e)
             {
