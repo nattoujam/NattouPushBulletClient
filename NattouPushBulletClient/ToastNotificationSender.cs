@@ -28,8 +28,12 @@ namespace NattouPushBulletClient
 		/// <param name="me"></param>
 		public void SendToastNotification(MirrorEphemeral me)
 		{
+			// decode icon (64bit jpeg)
+			var b = Convert.FromBase64String(me.Icon);
+			var iconPath = GetIconPathFromCache(me.ApplicationName, b);
+
 			// toast生成
-			var toast = CreateToastNotification(me.Title, me.Body, me.Icon, me.ApplicationName);
+			var toast = CreateToastNotification(me.Title, me.Body, iconPath, me.ApplicationName, true);
 			toast.Tag = me.Id;
 			toast.Group = me.ApplicationName;
 			this.groupNamePair.Add(toast.Tag, me.ApplicationName);
@@ -80,49 +84,11 @@ namespace NattouPushBulletClient
 
 		private ToastNotification CreateToastNotification(string title, string body, string applicationName)
 		{
-			// construct toast norification
-			var toastContent = new ToastContent()
-			{
-				Launch = "empty",
-				Visual = new ToastVisual()
-				{
-					BindingGeneric = new ToastBindingGeneric()
-					{
-						Children =
-						{
-							new AdaptiveText()
-							{
-								Text = title,
-								HintMaxLines = 1 //行数を制限
-							},
-							new AdaptiveText()
-							{
-								Text = body
-							}
-						},
-						AppLogoOverride = new ToastGenericAppLogo()
-						{
-							Source = Directory.GetParent(Assembly.GetExecutingAssembly().Location) + "\\Resources\\Icon.ico",
-							//HintCrop = ToastGenericAppLogoCrop.Circle //画像を丸くトリミング
-						},
-						Attribution = new ToastGenericAttributionText()
-						{
-							Text = applicationName
-						}
-					}
-				}
-			};
-
-			var xml = new XmlDocument();
-			xml.LoadXml(toastContent.GetContent());
-			return new ToastNotification(xml);
+			return CreateToastNotification(title, body, Directory.GetParent(Assembly.GetExecutingAssembly().Location) + "\\Resources\\Icon.ico", applicationName, false);
 		}
 
-		private ToastNotification CreateToastNotification(string title, string body, string iconSource, string applicationName)
+		private ToastNotification CreateToastNotification(string title, string body, string iconPath, string applicationName, bool isCircleIcon)
 		{
-			// decode icon (64bit jpeg)
-			var b = Convert.FromBase64String(iconSource);
-
 			// construct toast norification
 			var toastContent = new ToastContent()
 			{
@@ -145,8 +111,8 @@ namespace NattouPushBulletClient
 						},
 						AppLogoOverride = new ToastGenericAppLogo()
 						{
-							Source = GetIconPathFromCache(applicationName, b),
-							HintCrop = ToastGenericAppLogoCrop.Circle //画像を丸くトリミング
+							Source = iconPath,
+							HintCrop = isCircleIcon ? ToastGenericAppLogoCrop.Circle : ToastGenericAppLogoCrop.Default //画像を丸くトリミング
 						},
 						Attribution = new ToastGenericAttributionText()
 						{
