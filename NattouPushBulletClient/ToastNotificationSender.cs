@@ -102,8 +102,8 @@ namespace NattouPushBulletClient
 						},
 						AppLogoOverride = new ToastGenericAppLogo()
 						{
-							Source = Directory.GetParent(Assembly.GetExecutingAssembly().Location) + "Icon.ico",
-							HintCrop = ToastGenericAppLogoCrop.Circle //画像を丸くトリミング
+							Source = Directory.GetParent(Assembly.GetExecutingAssembly().Location) + "\\Resources\\Icon.ico",
+							//HintCrop = ToastGenericAppLogoCrop.Circle //画像を丸くトリミング
 						},
 						Attribution = new ToastGenericAttributionText()
 						{
