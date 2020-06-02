@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
+﻿using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Shell.PropertySystem;
 using MS.WindowsAPICodePack.Internal;
 using NattouPushBulletClient.Components;
 using System;
@@ -8,6 +9,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Navigation;
+using Windows.Devices.Lights.Effects;
+using WinUIXaml = Windows.UI.Xaml;
 
 namespace NattouPushBulletClient
 {
@@ -34,18 +38,21 @@ namespace NattouPushBulletClient
 			this.receiver.FailedToConnectEventHander += Receiver_FailedToConnectEventHander;
 			this.receiver.ReceiveMirrorEpemeral += Receiver_ReceiveMirrorEpemeral;
 			this.receiver.ReceiveDismissalEphemeral += Receiver_ReceiveDismissalEphemeral;
-		}
 
-		protected override void OnStartup(StartupEventArgs e)
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+		}
+		
+        protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+			Debug.WriteLine("start application");
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
 			CreateShortcut();
 			_ = StartMainTask();
 		}
 
-		private async Task StartMainTask()
+        private async Task StartMainTask()
 		{
 			var connectionEstablished = await this.receiver.ConnectAsync();
 
@@ -104,6 +111,28 @@ namespace NattouPushBulletClient
 			ErrorHelper.VerifySucceeded(newShortcutSave.Save(shortcutPath, true));
 		}
 
+
+		#region event
+
+		private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+		{
+			switch (e.Mode)
+			{
+				// スリープ
+				case PowerModes.Suspend:
+					Debug.WriteLine("suspend");
+					NotifyIcon_StopMenuItemClick(this, EventArgs.Empty);
+					break;
+				// 再開
+				case PowerModes.Resume:
+					Debug.WriteLine("resume");
+					_ = StartMainTask();
+					break;
+				case PowerModes.StatusChange:
+					break;
+			}
+		}
+
 		private void NotifyIcon_RunMenuItemClick(object sender, EventArgs e)
 		{
 			_ = StartMainTask();
@@ -154,5 +183,7 @@ namespace NattouPushBulletClient
 			// 確認済みの通知をアクションセンターから削除
 			this.sender.RemoveToastNotification(e.Id);
 		}
-	}
+
+        #endregion
+    }
 }
