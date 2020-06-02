@@ -64,7 +64,6 @@ namespace NattouPushBulletClient
 			}
 		}
 
-
 		private string GetIconPathFromCache(string applicationName, byte[] b)
 		{
 			if (this.iconPathPair.ContainsKey(applicationName))

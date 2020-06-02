@@ -18,7 +18,7 @@
 # 注意
 以下に対応していません。
 - End-to-End Encryption
-- SMS及びUniversal Copy/Pasten
+- SMS及びUniversal Copy/Paste
 - Chat
 - WindowsからPushBulletへの通知の送信
 - トースト通知のアクティベイト
@@ -26,5 +26,5 @@
 # Libraries
 - [Microsoft.Toolkit.Uwp.Notifications](https://github.com/windows-toolkit/WindowsCommunityToolkit) (v6.0.0)
 - [Microsoft.windows.SDK.Contracts](https://www.nuget.org/packages/Microsoft.Windows.SDK.Contracts) (v10.0.18362.2005)
-- Microsoft.WindowsAPICodePack-Shell (v.1.1.0)
+- [Microsoft.WindowsAPICodePack-ShellExtensions](https://github.com/contre/Windows-API-Code-Pack-1.1) (v.1.1.4)
 - [Newtonsoft.Json](https://www.newtonsoft.com/json) (v12.0.3)

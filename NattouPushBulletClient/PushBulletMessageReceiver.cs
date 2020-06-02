@@ -3,10 +3,12 @@ using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Networking.Sockets;
 
 namespace NattouPushBulletClient
 {
@@ -25,6 +27,13 @@ namespace NattouPushBulletClient
             ws = new ClientWebSocket();
             var accessToken = Properties.Settings.Default.AccessToken;
             var uri = new Uri("wss://stream.pushbullet.com/websocket/" + accessToken);
+
+            while(!NetworkInterface.GetIsNetworkAvailable())
+            {
+                Debug.WriteLine("do not connect network.");
+                await Task.Delay(1000);
+            }
+
             try
             {
                 using (this.connectTokenSource = new CancellationTokenSource())
